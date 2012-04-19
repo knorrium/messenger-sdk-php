@@ -510,8 +510,8 @@ class Yahoo_Messenger_Engine
 		curl_setopt($s,CURLOPT_MAXREDIRS, 3);
 		curl_setopt($s,CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($s,CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($s,CURLOPT_COOKIEJAR, 'cookie.txt');
-        curl_setopt($s,CURLOPT_COOKIEFILE, 'cookie.txt'); 
+		curl_setopt($s,CURLOPT_COOKIEJAR, 'cookie-' . $this->_config['username'] . '.txt');
+        curl_setopt($s,CURLOPT_COOKIEFILE, 'cookie-' . $this->_config['username'] . '.txt'); 
 		 
 		if(strtolower($method) == 'post')
 		{
