@@ -211,6 +211,27 @@ class Yahoo_Messenger_Engine
 		return true;
 	}
 
+	public function changePresenceState($state = 0, $status = '')
+	{
+		//prepare url
+		$url = self::URL_YM_PRESENCE;
+		$url .= '?oauth_consumer_key='. $this->_config['consumer_key'];		
+		$url .= '&oauth_nonce='. uniqid(rand());
+		$url .= '&oauth_signature='. $this->_config['secret_key']. '%26'. $this->_token['access']['oauth_token_secret'];
+		$url .= '&oauth_signature_method=PLAINTEXT';
+		$url .= '&oauth_timestamp='. time();
+		$url .= '&oauth_token='. $this->_token['access']['oauth_token'];
+		$url .= '&oauth_version=1.0';	
+		$url .= '&sid='. $this->_ym['signon']['sessionId'];
+		
+		//additional header
+		$header[] = 'Content-type: application/json; charset=utf-8';
+		$postdata = '{"presenceState" : '. $state. ', "presenceMessage" : "'. $status. '"}';
+		$rs = $this->curl($url, 'put', $header, $postdata);
+				
+		return true;
+	}
+
 	public function sendMessage($user, $message)
 	{
 		//prepare url
