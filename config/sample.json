@@ -1,0 +1,10 @@
+{
+    "robot": {
+        "credentials": {
+            "username": "username",
+            "password": "password"
+        },
+        "presence_state": 0,
+        "presence_status": "Online"
+    }
+}

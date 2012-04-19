@@ -1,0 +1,3 @@
+cookie*
+config/*
+!config/sample.json

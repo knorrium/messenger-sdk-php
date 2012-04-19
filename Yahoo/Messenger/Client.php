@@ -28,19 +28,21 @@
 require_once 'Engine.php';
 
 class Yahoo_Messenger_Client {
-    
-    const CONSUMER_KEY = '';
-    const SECRET_KEY   = '';
-    
+        
     protected $jsonObj;
     protected $engine;
+    protected $CONSUMER_KEY;
+    protected $SECRET_KEY;
     
-    public function __construct($config){
+    public function __construct($config, $CONSUMER_KEY, $SECRET_KEY){
+        $this->CONSUMER_KEY = $CONSUMER_KEY;
+        $this->SECRET_KEY = $SECRET_KEY;
+        
         $filename = "config/" . $config . ".json";
         
         $this->jsonObj = $this->jsonLoad($filename);
         
-        $this->engine = new Yahoo_Messenger_Engine(self::CONSUMER_KEY, self::SECRET_KEY, $this->jsonObj->robot->credentials->username, $this->jsonObj->robot->credentials->password);
+        $this->engine = new Yahoo_Messenger_Engine($this->CONSUMER_KEY, $this->SECRET_KEY, $this->jsonObj->robot->credentials->username, $this->jsonObj->robot->credentials->password);
         $this->engine->debug = true;
     }
     
