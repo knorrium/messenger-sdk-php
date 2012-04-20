@@ -38,7 +38,7 @@ class Yahoo_Messenger_Client {
         $this->CONSUMER_KEY = $CONSUMER_KEY;
         $this->SECRET_KEY = $SECRET_KEY;
         
-        $filename = "config/" . $config . ".json";
+        $filename = $config;
         
         $this->jsonObj = $this->jsonLoad($filename);
         

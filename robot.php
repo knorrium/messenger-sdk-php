@@ -6,12 +6,12 @@
     } else {
         
         // you should create this file and paste your key in it without any other character or line breaks
-        $filename = 'config/CONSUMER_KEY';
+        $filename = __DIR__ . '/config/CONSUMER_KEY';
         $handle = fopen($filename, "r");
         $CONSUMER_KEY = fread($handle, filesize($filename));
         fclose($handle);
         // you should create this file and paste your key in it without any other character or line breaks
-        $filename = 'config/SECRET_KEY';
+        $filename = __DIR__ . '/config/SECRET_KEY';
         $handle = fopen($filename, "r");
         $SECRET_KEY = fread($handle, filesize($filename));
         fclose($handle);
