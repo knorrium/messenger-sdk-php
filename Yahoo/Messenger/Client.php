@@ -120,6 +120,33 @@ class Yahoo_Messenger_Client {
         				/*
         				 * do actions
         				 */
+        				 
+         				if ($key == 'disconnect'){
+                              switch(intval($val['reason'])){
+                                  case 1: { 
+                                      $reason = "This user session has been expired because of login elsewhere.\n";
+                                      break;
+                                  }
+                                  case 2: {
+                                      $reason = "This user session has been expired because of idleness.\n";
+                                      break;
+                                  }
+                                  case 3: {
+                                      $reason = "This user session has been expired because messages in the session notification queue are not fetched.\n";
+                                      break;
+                                  }
+                                  case 5: {
+                                      $reason = "User has logged out\n";
+                                      break;
+                                  }
+                                  default: {
+                                      $reason = "Disconnected due to an unexpected cause. Error code: " . intval($val['reason']);
+                                      break;
+                                  }
+                              }
+                              echo "Disconnected: " . $reason;
+                              exit();
+                          }
         				if ($key == 'buddyInfo') //contact list
         				{
         					if (!isset($val['contact'])) continue;
