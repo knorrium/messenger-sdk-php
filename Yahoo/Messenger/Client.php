@@ -206,7 +206,7 @@ class Yahoo_Messenger_Client {
         					if ($this->engine->debug) echo '> Sending reply message '. PHP_EOL;
         					if ($this->engine->debug) echo '    '. $out. PHP_EOL;	
         					if ($this->engine->debug) echo '----------'. PHP_EOL;
-        					$this->engine->sendMessage($val['sender'], json_encode($out));
+        					$this->engine->sendMessage($val['sender'], $out);
         				}
 
         				else if ($key == 'buddyAuthorize') //incoming contact request

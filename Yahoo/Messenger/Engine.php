@@ -248,7 +248,7 @@ class Yahoo_Messenger_Engine
 		
 		//additional header
 		$header[] = 'Content-type: application/json; charset=utf-8';
-		$postdata = '{"message" : '. $message. '}';
+		$postdata = json_encode(array("message" => $message));
 		
 		$rs = $this->curl($url, 'post', $header, $postdata);
 		
