@@ -166,7 +166,8 @@ class Yahoo_Messenger_Client {
         					if ($this->engine->debug) echo '----------'. PHP_EOL;
 
         					//reply
-        					$words = explode(' ', trim(strtolower($val['msg'])));
+        					$words = explode(' ', trim($val['msg']));
+        					$words[0] = strtolower($words[0]);
         					if ($words[0] == 'help')
         					{
         						$out = 'This is Yahoo! Open API demo'. PHP_EOL;
