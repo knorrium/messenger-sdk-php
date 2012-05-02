@@ -191,7 +191,15 @@ class Yahoo_Messenger_Client {
         					{
         						$this->engine->changePresence(str_replace('status ', '', strtolower($val['msg'])));
         						$out = 'My status is changed';
-        					}	
+        					}
+        					else if ($words[0] == 'message'){
+        					    
+        					    $username = $words[1];
+        					    $message = implode(" ", array_slice($words, 2));
+        					    
+        					    $this->engine->sendMessage($username, $message);
+        					    $out = 'Message sent to ' . $username . ": " . $message;
+        					}
         					else if ($words[0] == 'presence_state')
         					{
         						$this->engine->changePresenceState(str_replace('presence_state ', '', strtolower($val['msg'])));
