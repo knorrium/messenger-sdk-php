@@ -102,7 +102,7 @@ class Yahoo_Messenger_Client {
         				if ($this->engine->debug) echo '> Fetching access token'. PHP_EOL;
         				if (!$this->engine->fetchAccessToken()) die('Fetching access token failed');				
 
-        				if ($this->engine->debug) echo '> Signon as: '. self::USERNAME. PHP_EOL;
+        				if ($this->engine->debug) echo '> Signon as: '. $this->jsonObj->robot->credentials->username . PHP_EOL;
         				if (!$this->engine->signon(date('H:i:s'))) die('Signon failed');
 
         				$seq = -1;
