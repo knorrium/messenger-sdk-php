@@ -77,10 +77,38 @@ class Yahoo_Messenger_Client {
         }
 
         if (!$this->engine->signon($this->jsonObj->robot->presence_status, $this->jsonObj->robot->presence_state)) {
-            $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . "Sigon failed 1";
+            $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . "Signon failed 1";
             die($msg);
         }
     }
+    public function disconnect() {
+        if ($this->engine->debug) {
+            echo '> Fetching request token'. PHP_EOL;
+        }
+        if (!$this->engine->fetchRequestToken()) {
+            $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . 'Fetching request token failed';
+            die($msg);
+        }
+
+        if ($this->engine->debug) {
+            echo '> Fetching access token'. PHP_EOL;
+        }
+
+        if (!$this->engine->fetchAccessToken()) {
+            $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . 'Fetching access token failed';
+            die($msg);
+        }
+
+        if ($this->engine->debug) {
+            echo '> Signing off '. $this->jsonObj->robot->credentials->username . PHP_EOL;
+        }
+
+        if (!$this->engine->signoff()) {
+            $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . "Signoff failed";
+            die($msg);
+        }
+    }
+    
     public function run() {
         $seq = -1;
         while (true) {
