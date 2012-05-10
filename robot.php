@@ -1,7 +1,13 @@
 <?php
     require_once 'Yahoo/Messenger/Client.php';
     
-    if ($argv[1] == NULL){
+    function shutdown() {
+        echo 'Script executed with success', PHP_EOL;
+    }
+
+    register_shutdown_function('shutdown');
+    
+    if ($argv[1] == NULL) {
         die("No robot config provided\n");
     } else {
         

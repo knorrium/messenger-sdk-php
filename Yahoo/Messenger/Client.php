@@ -28,39 +28,33 @@
 require_once 'Engine.php';
 
 class Yahoo_Messenger_Client {
-        
     protected $jsonObj;
     protected $engine;
     protected $CONSUMER_KEY;
     protected $SECRET_KEY;
-    
-    public function __construct($config, $CONSUMER_KEY, $SECRET_KEY){
+
+    public function __construct($config, $CONSUMER_KEY, $SECRET_KEY) {
         $this->CONSUMER_KEY = $CONSUMER_KEY;
         $this->SECRET_KEY = $SECRET_KEY;
-        
         $filename = $config;
-        
         $this->jsonObj = $this->jsonLoad($filename);
-        
         $this->engine = new Yahoo_Messenger_Engine($this->CONSUMER_KEY, $this->SECRET_KEY, $this->jsonObj->robot->credentials->username, $this->jsonObj->robot->credentials->password);
         $this->engine->debug = true;
     }
-    
-    private function jsonLoad($filename){
+
+    private function jsonLoad($filename) {
         $handle = fopen($filename, "r");
         $json = fread($handle, filesize($filename));
         fclose($handle);
-
         $jsonObj = json_decode($json);
-
         return $jsonObj;
     }
 
-    public function getUsername(){
+    public function getUsername() {
         return $this->jsonObj->robot->credentials->username;
     }
-    
-    public function connect(){
+
+    public function connect() {
         if ($this->engine->debug) {
             echo '> Fetching request token'. PHP_EOL;
         }
@@ -68,62 +62,59 @@ class Yahoo_Messenger_Client {
             $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . 'Fetching request token failed';
             die($msg);
         }
-        
-        if ($this->engine->debug) { 
+
+        if ($this->engine->debug) {
             echo '> Fetching access token'. PHP_EOL;
         }
-        
+
         if (!$this->engine->fetchAccessToken()) {
             $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . 'Fetching access token failed';
             die($msg);
         }
-        
+
         if ($this->engine->debug) {
             echo '> Signon as: '. $this->jsonObj->robot->credentials->username . PHP_EOL;
         }
-        
+
         if (!$this->engine->signon($this->jsonObj->robot->presence_status, $this->jsonObj->robot->presence_state)) {
             $msg = "[" . $this->jsonObj->robot->credentials->username . "] " . "Sigon failed 1";
             die($msg);
         }
     }
-	public function run() { 
-	    
+    public function run() {
         $seq = -1;
-        while (true)
-        {
-        	$resp = $this->engine->fetchLongNotification($seq+1);
-        	if (isset($resp))
-        	{	
-        		if ($resp === false) 
-        		{		
-        			if ($this->engine->getError() != -10)
-        			{
-        				if ($this->engine->debug) echo '> Fetching access token'. PHP_EOL;
-        				if (!$this->engine->fetchAccessToken()) die('Fetching access token failed');				
+        while (true) {
+            $resp = $this->engine->fetchLongNotification($seq+1);
+            if (isset($resp)) {
+                if ($resp === false) {
+                    if ($this->engine->getError() != -10) {
+                        if ($this->engine->debug) {
+                            echo '> Fetching access token'. PHP_EOL;
+                        }
+                        if (!$this->engine->fetchAccessToken()) {
+                            die('Fetching access token failed');
+                        }
+                        if ($this->engine->debug) {
+                            echo '> Signon as: '. $this->jsonObj->robot->credentials->username . PHP_EOL;
+                        }
+                        if (!$this->engine->signon(date('H:i:s'))) {
+                            die('Signon failed');
+                        }
+                        $seq = -1;
+                    }
+                    continue;
+                }
+                foreach ($resp as $row) {
+                    foreach ($row as $key=>$val) {
+                        if ($val['sequence'] > $seq) $seq = intval($val['sequence']);
 
-        				if ($this->engine->debug) echo '> Signon as: '. $this->jsonObj->robot->credentials->username . PHP_EOL;
-        				if (!$this->engine->signon(date('H:i:s'))) die('Signon failed');
+                        /*
+                         * do actions
+                         */
 
-        				$seq = -1;
-        			}
-        			continue;							
-        		}
-
-
-        		foreach ($resp as $row)
-        		{
-        			foreach ($row as $key=>$val)
-        			{
-        				if ($val['sequence'] > $seq) $seq = intval($val['sequence']);
-
-        				/*
-        				 * do actions
-        				 */
-        				 
-         				if ($key == 'disconnect'){
-                              switch(intval($val['reason'])){
-                                  case 1: { 
+                        if ($key == 'disconnect') {
+                              switch(intval($val['reason'])) {
+                                  case 1: {
                                       $reason = "This user session has been expired because of login elsewhere.\n";
                                       break;
                                   }
@@ -147,92 +138,104 @@ class Yahoo_Messenger_Client {
                               echo "Disconnected: " . $reason;
                               exit();
                           }
-        				if ($key == 'buddyInfo') //contact list
-        				{
-        					if (!isset($val['contact'])) continue;
+                        if ($key == 'buddyInfo') { //contact list
+                            if (!isset($val['contact'])) {
+                                continue;
+                            }
+                            if ($this->engine->debug) {
+                                echo PHP_EOL. 'Contact list: '. PHP_EOL;
+                            }
+                            foreach ($val['contact'] as $item)
+                            {
+                                if ($this->engine->debug) {
+                                    echo $item['sender']. PHP_EOL;
+                                }
+                            }
+                            if ($this->engine->debug) {
+                                echo '----------'. PHP_EOL;
+                            }
+                        }
 
-        					if ($this->engine->debug) echo PHP_EOL. 'Contact list: '. PHP_EOL;
-        					foreach ($val['contact'] as $item)
-        					{
-        						if ($this->engine->debug) echo $item['sender']. PHP_EOL;
-        					}
-        					if ($this->engine->debug) echo '----------'. PHP_EOL;
-        				}
+                        else if ($key == 'message') { //incoming message
+                            if ($this->engine->debug) {
+                                echo '+ Incoming message from: "'. $val['sender']. '" on "'. date('H:i:s', $val['timeStamp']). '"'. PHP_EOL;
+                            }
+                            if ($this->engine->debug) { 
+                                echo '   '. $val['msg']. PHP_EOL;
+                            }
+                            if ($this->engine->debug) {
+                                echo '----------'. PHP_EOL;
+                            }
 
-        				else if ($key == 'message') //incoming message
-        				{
-        					if ($this->engine->debug) echo '+ Incoming message from: "'. $val['sender']. '" on "'. date('H:i:s', $val['timeStamp']). '"'. PHP_EOL;
-        					if ($this->engine->debug) echo '   '. $val['msg']. PHP_EOL;
-        					if ($this->engine->debug) echo '----------'. PHP_EOL;
+                            //reply
+                            $words = explode(' ', trim($val['msg']));
+                            $words[0] = strtolower($words[0]);
+                            if ($words[0] == 'help') {
+                                $out = 'This is Yahoo! Open API demo'. PHP_EOL;
+                                $out .= '  To get recent news from yahoo type: news'. PHP_EOL;
+                                $out .= '  To change my/robot status type: status newstatus'. PHP_EOL;
+                            }
+                            else if ($words[0] == 'news') {
+                                if ($this->engine->debug) {
+                                    echo '> Retrieving news rss'. PHP_EOL;
+                                } 
+                                $rss = file_get_contents('http://rss.news.yahoo.com/rss/topstories');
 
-        					//reply
-        					$words = explode(' ', trim($val['msg']));
-        					$words[0] = strtolower($words[0]);
-        					if ($words[0] == 'help')
-        					{
-        						$out = 'This is Yahoo! Open API demo'. PHP_EOL;
-        						$out .= '  To get recent news from yahoo type: news'. PHP_EOL;
-        						$out .= '  To change my/robot status type: status newstatus'. PHP_EOL;
-        					}
-        					else if ($words[0] == 'news')
-        					{
-        						if ($this->engine->debug) echo '> Retrieving news rss'. PHP_EOL;
-        						$rss = file_get_contents('http://rss.news.yahoo.com/rss/topstories');
+                                if (preg_match_all('|<title>(.*?)</title>|is', $rss, $m)) {
+                                    $out = 'Recent Yahoo News:'. PHP_EOL;
+                                    for ($i=2; $i<7; $i++) {
+                                        $out .= str_replace("\n", ' ', $m[1][$i]). PHP_EOL;
+                                    }
+                                }
+                            }
+                            else if ($words[0] == 'status') {
+                                $this->engine->changePresence(str_replace('status ', '', strtolower($val['msg'])));
+                                $out = 'My status is changed';
+                            }
+                            else if ($words[0] == 'message') {
+                                $username = $words[1];
+                                $message = implode(" ", array_slice($words, 2));
+                                $this->engine->sendMessage($username, $message);
+                                $out = 'Message sent to ' . $username . ": " . $message;
+                            }
+                            else if ($words[0] == 'presence_state') {
+                                $this->engine->changePresenceState(str_replace('presence_state ', '', strtolower($val['msg'])));
+                                $out = 'My status is changed';
+                            }
+                            else {
+                                $out = 'Please type: help';
+                            }
 
-        						if (preg_match_all('|<title>(.*?)</title>|is', $rss, $m))
-        						{
-        							$out = 'Recent Yahoo News:'. PHP_EOL;
-        							for ($i=2; $i<7; $i++)
-        							{
-        								$out .= str_replace("\n", ' ', $m[1][$i]). PHP_EOL;
-        							}
-        						}
-        					}
-        					else if ($words[0] == 'status')
-        					{
-        						$this->engine->changePresence(str_replace('status ', '', strtolower($val['msg'])));
-        						$out = 'My status is changed';
-        					}
-        					else if ($words[0] == 'message'){
-        					    
-        					    $username = $words[1];
-        					    $message = implode(" ", array_slice($words, 2));
-        					    
-        					    $this->engine->sendMessage($username, $message);
-        					    $out = 'Message sent to ' . $username . ": " . $message;
-        					}
-        					else if ($words[0] == 'presence_state')
-        					{
-        						$this->engine->changePresenceState(str_replace('presence_state ', '', strtolower($val['msg'])));
-        						$out = 'My status is changed';
-        					}
-        					else
-        					{
-        						$out = 'Please type: help';
-        					}
+                            //send message
+                            if ($this->engine->debug) { 
+                                echo '> Sending reply message '. PHP_EOL;
+                            }
+                            if ($this->engine->debug) { 
+                                echo '    '. $out. PHP_EOL;
+                            }
+                            if ($this->engine->debug) {
+                                echo '----------'. PHP_EOL;
+                            }
+                            $this->engine->sendMessage($val['sender'], $out);
+                        }
 
-        					//send message
-        					if ($this->engine->debug) echo '> Sending reply message '. PHP_EOL;
-        					if ($this->engine->debug) echo '    '. $out. PHP_EOL;	
-        					if ($this->engine->debug) echo '----------'. PHP_EOL;
-        					$this->engine->sendMessage($val['sender'], $out);
-        				}
-
-        				else if ($key == 'buddyAuthorize') //incoming contact request
-        				{
-        					if ($this->engine->debug) echo PHP_EOL. 'Accept buddy request from: '. $val['sender']. PHP_EOL;					
-        					if ($this->engine->debug) echo '----------'. PHP_EOL;	
-        					if (!$this->engine->responseContact($val['sender'], true, 'Welcome to my list'))
-        					{
-        						$this->engine->deleteContact($val['sender']);
-        						$this->engine->responseContact($val['sender'], true, 'Welcome to my list');
-        					}
-        				}
-        		}
-        		}
-        	}	
-	    }
-	}
+                        else if ($key == 'buddyAuthorize') { //incoming contact request
+                            if ($this->engine->debug) {
+                                echo PHP_EOL. 'Accept buddy request from: '. $val['sender']. PHP_EOL;
+                            }
+                            if ($this->engine->debug) {
+                                echo '----------'. PHP_EOL;
+                            }
+                            if (!$this->engine->responseContact($val['sender'], true, 'Welcome to my list')) {
+                                $this->engine->deleteContact($val['sender']);
+                                $this->engine->responseContact($val['sender'], true, 'Welcome to my list');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 ?>
