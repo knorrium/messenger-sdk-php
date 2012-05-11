@@ -32,6 +32,8 @@ class Yahoo_Messenger_Client {
     protected $engine;
     protected $CONSUMER_KEY;
     protected $SECRET_KEY;
+    protected $presence_state;
+    protected $presence_status;
 
     public function __construct($config, $CONSUMER_KEY, $SECRET_KEY) {
         $this->CONSUMER_KEY = $CONSUMER_KEY;
@@ -39,6 +41,8 @@ class Yahoo_Messenger_Client {
         $filename = $config;
         $this->jsonObj = $this->jsonLoad($filename);
         $this->engine = new Yahoo_Messenger_Engine($this->CONSUMER_KEY, $this->SECRET_KEY, $this->jsonObj->robot->credentials->username, $this->jsonObj->robot->credentials->password);
+        $this->presence_state = $this->jsonObj->robot->presence_state;
+        $this->presence_status = $this->jsonObj->robot->presence_status;
         $this->engine->debug = true;
     }
 
@@ -227,7 +231,13 @@ class Yahoo_Messenger_Client {
                                 $out = 'Message sent to ' . $username . ": " . $message;
                             }
                             else if ($words[0] == 'presence_state') {
-                                $this->engine->changePresenceState(str_replace('presence_state ', '', strtolower($val['msg'])));
+                                $this->presence_state = str_replace('presence_state ', '', strtolower($val['msg']));
+                                $this->engine->changePresenceState($this->presence_state, $this->presence_status);
+                                $out = 'My state is changed';
+                            }
+                            else if ($words[0] == 'presence_status') {
+                                $this->presence_status = str_replace('presence_status ', '', $val['msg']);
+                                $this->engine->changePresenceStatus($this->presence_state, $this->presence_status);
                                 $out = 'My status is changed';
                             }
                             else {
