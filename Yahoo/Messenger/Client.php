@@ -240,6 +240,12 @@ class Yahoo_Messenger_Client {
                                 $this->engine->changePresenceStatus($this->presence_state, $this->presence_status);
                                 $out = 'My status is changed';
                             }
+                            else if ($words[0] == 'signoff') {
+                                $out = 'Goodbye!';
+                                $this->engine->sendMessage($val['sender'], $out);
+                                $this->engine->signoff();
+                                die();
+                            }
                             else {
                                 $out = 'Please type: help';
                             }
