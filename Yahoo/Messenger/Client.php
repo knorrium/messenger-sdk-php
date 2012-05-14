@@ -230,6 +230,10 @@ class Yahoo_Messenger_Client {
                                 $this->engine->changePresenceState(str_replace('presence_state ', '', strtolower($val['msg'])));
                                 $out = 'My status is changed';
                             }
+                            else if ($words[0] == 'delete') {
+                                $this->engine->deleteContact($words[1], $words[2]);
+                                $out = 'OK, I never wanted ' . $words[1] . ' on group ' . $words[2] . ' anyway...';
+                            }
                             else {
                                 $out = 'Please type: help';
                             }
