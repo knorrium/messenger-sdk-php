@@ -178,7 +178,7 @@ class Yahoo_Messenger_Engine {
         return true;
     }
 
-    public function changePresence($status = '', $state = 0) {
+    public function changePresenceState($state = 0, $message = '') {
         //prepare url
         $url = self::URL_YM_PRESENCE;
         $url .= '?oauth_consumer_key='. $this->_config['consumer_key'];
@@ -192,13 +192,13 @@ class Yahoo_Messenger_Engine {
 
         //additional header
         $header[] = 'Content-type: application/json; charset=utf-8';
-        $postdata = '{"presenceState" : '. $state. ', "presenceMessage" : "'. $status. '"}';
+        $postdata = '{"presenceState" : '. $state. ', "presenceMessage" : "'. $message. '"}';
         $rs = $this->curl($url, 'put', $header, $postdata);
 
         return true;
     }
 
-    public function changePresenceState($state = 0, $status = '') {
+    public function changePresenceStatus($state = 0, $message = '') {
         //prepare url
         $url = self::URL_YM_PRESENCE;
         $url .= '?oauth_consumer_key='. $this->_config['consumer_key'];
@@ -212,7 +212,7 @@ class Yahoo_Messenger_Engine {
 
         //additional header
         $header[] = 'Content-type: application/json; charset=utf-8';
-        $postdata = '{"presenceState" : '. $state. ', "presenceMessage" : "'. $status. '"}';
+        $postdata = '{"presenceState" : '. $state. ', "presenceMessage" : "'. $message. '"}';
         $rs = $this->curl($url, 'put', $header, $postdata);
 
         return true;
