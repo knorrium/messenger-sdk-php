@@ -240,6 +240,10 @@ class Yahoo_Messenger_Client {
                                 $this->engine->changePresenceStatus($this->presence_state, $this->presence_status);
                                 $out = 'My status is changed';
                             }
+                            else if ($words[0] == 'delete') {
+                                $this->engine->deleteContact($words[1], $words[2]);
+                                $out = 'OK, I never wanted ' . $words[1] . ' on group ' . $words[2] . ' anyway...';
+                            }
                             else if ($words[0] == 'signoff') {
                                 $out = 'Goodbye!';
                                 $this->engine->sendMessage($val['sender'], $out);
